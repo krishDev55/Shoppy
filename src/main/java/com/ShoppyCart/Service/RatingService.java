@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.ShoppyCart.Repository.RatingDao;
@@ -21,6 +23,8 @@ public class RatingService {
 	@Autowired RatingDao ratingDao;
 	@Autowired UserService userService;
 	@Autowired ProductService productService;
+	
+	
 	
 	public String setRating(Rating rating) {	
 		String dateToStr = DateFormat.getInstance().format(new Date());  
@@ -38,16 +42,28 @@ public class RatingService {
 			rating.setId(temp.getId());
 			return ratingDao.updateRating(rating);
 		}
-	
 	}
 
+	
+	
+	
+	@CachePut(value = "Rating", key = "#rating.id")
 	public String updateRating(Rating rating) {
 		return ratingDao.updateRating(rating);
 	}
 	
+	
+	
+	
+	@Cacheable(value="Rating" ,key = "#productId")
 	public List<Rating> getAllRatingByProductId(int productId){
 		return ratingDao.getllRatingByProductId(productId);	
 	}
+	
+	
+	
+	
+	
 	
 	// extra Oparation Like rating and User masage and reviev system
 	public  List<RatingCombineData> combainData(int productId) {

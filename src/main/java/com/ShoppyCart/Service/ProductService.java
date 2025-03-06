@@ -6,6 +6,8 @@ import java.util.Set;
 
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.ShoppyCart.Repository.ProductDao;
@@ -19,18 +21,25 @@ public class ProductService {
 	@Autowired
 	ProductDao productDao;
 	
+	
+	@CachePut(value="Products", key = "product.id")
 	public Products saveProduct(Products product) {
 		Categery categary = product.getCategary();
 		System.out.println("categery is : "+ categary);
 		Products product1 = productDao.saveProduct(product);
-		
 		return product1;
 		}
 		
+	
+	
+	@Cacheable(value = "Products" ,key = "#id")
 		public Products getProductById(int  id) {
 			return productDao.getProductById(id);
 			}
 		
+	
+	
+	@CachePut(value="Categery", key="categary.catId")
 		public Categery saveCategery(Categery categary) {
 			Categery categary1 = getCategeryById(categary.getCatId());
 //			----
@@ -52,19 +61,31 @@ public class ProductService {
 				return productDao.saveCategery(categary);
 			}
 //			-------------------
-			
-		
 		}
 		
-		public Categery getCategeryById(int  id) {
-			
+	
+	
+	
+	
+	@Cacheable(value="Categery" , key = "#id")
+		public Categery getCategeryById(int  id) {		
 			return productDao.getCategeryById(id);
-			}
+		}
 
+	
+	
+	
+	
+		@Cacheable
 		public List<Products> getAllProducts() {
-			// TODO Auto-generated method stub
 			return productDao.getAllProducts();
 		}
+	
+	
+	
+	
+		
+		
 		public Set<Products> getAllRandomProducts() {
 			List<Products> list = productDao.getAllProducts();
 			Set<Products> set= new HashSet<>();
@@ -74,18 +95,23 @@ public class ProductService {
 				Products product = list.get(genrateId);
 				set.add(product);
 			}
-			
 			return set;
 		}
 		
+		
+		
+		
+		@Cacheable(value = "Products", key = "#vendorId")
 		public List<Products> getProductByVendorId(String vendorId){	
 			List<Products> products = productDao.getAllProductsByVendorId(vendorId);
 			System.out.println("All product is : "+products);
 			return products ;
 		}
 
+		
+		
+		
 		public List<Products> searchProduct(String search) {
-			// TODO Auto-generated method stub
 			return null;
 		}
 		
