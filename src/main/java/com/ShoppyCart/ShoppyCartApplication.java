@@ -9,6 +9,15 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 
+
+
+/**
+ *  This  is main method  to starting Point of your application...
+ *    then use the @SpringBootApplication Annotation . they Are Combine Three
+ *    Annotation  like { @EnableAutoConfiguration , 
+ *    @ComponentScane , @SpringBootConfiguration }
+ *
+ * */
 @SpringBootApplication()
 @EnableCaching
 public class ShoppyCartApplication //implements CommandLineRunner
