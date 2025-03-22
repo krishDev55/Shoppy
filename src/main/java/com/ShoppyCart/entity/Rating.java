@@ -3,6 +3,8 @@ package com.ShoppyCart.entity;
 import java.time.LocalDate;
 import java.util.Date;
 
+import org.springframework.validation.annotation.Validated;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -10,6 +12,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+
 
 @Entity
 	public class Rating {
@@ -17,7 +23,9 @@ import jakarta.persistence.ManyToOne;
 	    @Id                   
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	    private long id;
-
+     
+	    @Min(value = 0 ,message = "valiu is  mminimum")
+	    @Max(value = 5, message = "value is maximum")
 	    private double value;  // e.g., a number between 1 and 5
 	 
 	    // Optionally include review/comment fields, user info, etc.
@@ -96,7 +104,7 @@ import jakarta.persistence.ManyToOne;
 
 		@Override
 		public String toString() {
-			return "Rating [id=" + id + ", value=" + value + ", comment=" + comment + ", product=" + product + "]";
+			return "\nRating [id=" + id + ", value=" + value + ", comment=" + comment + ", product=" + product + "]";
 		}
 
 	   

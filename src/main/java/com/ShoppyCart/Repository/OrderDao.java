@@ -3,19 +3,33 @@ package com.ShoppyCart.Repository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 
+import com.ShoppyCart.commonUse.CacheMachanism;
 import com.ShoppyCart.entity.Order;
+import com.ShoppyCart.entity.Products;
+import com.ShoppyCart.entity.Rating;
 
 @Repository
 public class OrderDao {
 	private Session session;
+	
+	@Autowired CacheMachanism cacheMachamism;
+	@Autowired CacheManager cacheManager;
 	
 	public OrderDao(SessionFactory sessionFactory) {
 		this.session=sessionFactory.openSession();
@@ -50,24 +64,66 @@ public class OrderDao {
 		return list;
 	}
 
+	
+	
+	@Cacheable(value = "Orders" )
 	public List<Order> getOrders() {
-		// TODO Auto-generated method stub
-		return null;
+		System.out.println("inside getOrders Dao ");
+		String query="select *from Orders";
+		List<Order> list= new ArrayList<>();
+		session.doWork(connection->{
+			try (Statement stmt = connection.createStatement()) {
+				ResultSet result = stmt.executeQuery(query);
+				while(result.next()) {
+					Order o= new Order();
+					o.setOrderId(result.getString("orderId"));
+					o.setPrice(result.getDouble("price"));
+					o.setProdId(result.getInt("prodId"));
+					o.setProductImg(result.getString("productImg"));
+					o.setProductName(result.getString("productName"));
+					o.setQuentity(result.getInt("quentity"));
+					o.setStatus(result.getString("status"));
+					o.setTime(result.getString("time"));
+					o.setUserId(result.getInt("userId"));
+				
+					list.add(o);
+					
+				}
+			};
+		});
+		
+		 Cache itemsCache = cacheManager.getCache("Product");
+		 for (Order order : list) {
+	            itemsCache.put(order.getOrderId(), order); // Key = itemId, Value = Item
+	        }
+		 
+		  itemsCache.put("allOrders", list);
+		  
+		return list;
 	}
 
+	@Cacheable(value = "Order", key = "#orderId")
 	public Order getOrderByOrderId(String orderId) {
+		System.out.println("inside OrderId method" );
 		Order order = session.find(Order.class, orderId);
 		return order;
 	}
 
-	public Order saveOrder(Order order) {
+	
+	@CachePut(value="Order" ,key = "#order.userId")
+	public List<Order> saveOrder(Order order) {
+		System.out.println("inside save Mehtod ...");
 		Transaction tnx = session.beginTransaction();
 		session.persist(order);
-		
 		tnx.commit();
-		return order;
+		List<Order> cacheList = updOrderCacheNew(order);
+		cacheList.add(order);
+		return cacheList;
 	}
 
+	
+	
+	@CacheEvict(value="Order" ,key = "#orderId")
 	public String deleteOrderById(String orderId) {
 		String query="delete from orders where orderId=?";
 		try {
@@ -80,9 +136,26 @@ public class OrderDao {
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
+		cacheMachamism.evictCacheEntry("Order",orderId);
+		String name = session.getCacheStoreMode().name();
 		return "order delete";
 	}
-
+	
+	
+	private  List<Order> updOrderCacheNew(Order order) {
+		Object cachedValue =cacheMachamism.getCachedValue("Order", order.getOrderId());
+		 List<Order> collect= null;
+		 if (cachedValue instanceof List) {
+	            // Safely cast to List<Item> (with unchecked cast warning suppressed)
+	            @SuppressWarnings("unchecked")
+	            List<Order> orders = (List<Order>) cachedValue;
+	           collect = orders.stream()
+	            						.map(e-> e.getOrderId()==order.getOrderId() ? order : e )
+	            					.collect(Collectors.toList());
+	            return collect;
+	        }
+		 return new ArrayList<Order>();
+	}
 	
 	
 	public List<Order> getOrderByVendorId(String vendorId) {

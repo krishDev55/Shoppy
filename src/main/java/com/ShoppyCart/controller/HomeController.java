@@ -2,10 +2,13 @@ package com.ShoppyCart.controller;
 
 
 
+
 import java.net.HttpCookie;
 import java.net.http.HttpRequest;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -13,19 +16,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
-
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.tomcat.util.digester.ArrayStack;
+import org.json.JSONObject;
 //import org.apache.kafka.clients.consumer.Consumer;
 //import org.apache.kafka.clients.consumer.ConsumerRecord;
 //import org.apache.kafka.clients.consumer.ConsumerRecords;
 //import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.cache.Cache;
+import org.springframework.cache.Cache.ValueWrapper;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
@@ -43,14 +52,20 @@ import com.ShoppyCart.Kafka.Consumers;
 import com.ShoppyCart.Kafka.JsonProducer;
 import com.ShoppyCart.Kafka.Producer;
 import com.ShoppyCart.Kafka.vo.UserSend;
+import com.ShoppyCart.Repository.RatingDao;
 import com.ShoppyCart.Service.ProductService;
 import com.ShoppyCart.Service.UserService;
 import com.ShoppyCart.Service.VendorService;
+import com.ShoppyCart.commonUse.CacheMachanism;
 import com.ShoppyCart.entity.Categery;
 import com.ShoppyCart.entity.Products;
+import com.ShoppyCart.entity.Rating;
 import com.ShoppyCart.entity.User;
 import com.ShoppyCart.entity.Vendor;
 import com.ShoppyCart.vo.LoginCreadintial;
+import com.razorpay.Order;
+import com.razorpay.RazorpayClient;
+import com.razorpay.RazorpayException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -66,12 +81,17 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RestController
 @RequestMapping("/v1")
 public class HomeController {
-	@Autowired
-	ProductService productService;
-	@Autowired
-	UserService userService;
-	@Autowired
-	VendorService vendorService;
+	@Autowired ProductService productService;
+	
+	@Autowired UserService userService;
+	
+	@Autowired VendorService vendorService;
+	
+	@Autowired CacheManager cacheManager;
+	
+	@Autowired CacheMachanism cacheMachanism;
+	
+
 	
 //	When we are use kafka server then comments the line
 	/*
@@ -83,7 +103,64 @@ public class HomeController {
 	 */
 	
 	
+	static String  KEY="rzp_test_HKhIE2kfoLbD8L";
+	static String 	SECRET="9FnBhBsO6eDmvEa7KrHQO69h";
+	// this Logic is Razorpay peyment Application : 
+	
+	@PostMapping("/pay")
+	public String razorpayPayment(@RequestBody Map<String, Object> data) throws RazorpayException {
+		System.out.println("inside pay method ......1!!!"); 
+		var client=new RazorpayClient(KEY, SECRET);
+		
+		int amt=Integer.parseInt(data.get("amount").toString());
+		
+		System.out.println("inside pay method 2 ......1!!! "+amt); 
+		
+		JSONObject orderRequest = new JSONObject();
+		orderRequest.put("amount",amt*100);
+		orderRequest.put("currency","INR");
+		orderRequest.put("receipt", "txn_112121");
+		
+		System.out.println("inside pay method 3 ......1!!! "); 
+		// create a order 
+				Order order = client.orders.create(orderRequest);
+				System.out.println("Order is create : "+order);
+				
+				JSONObject notes = new JSONObject();
+				notes.put("notes_key_1","Tea, Earl Grey, Hot");
+				orderRequest.put("notes",notes);
+				
+				String order2 = order.toString();
+			
+				System.out.println("Massage is "+order2);
+		return order2;
+	}
+	
+	@GetMapping("/status/{orderId}")
+	public String getPaymentStatus(@PathVariable String orderId) {
+	    try {
+	        RazorpayClient razorpay = new RazorpayClient(KEY, SECRET);
+	        List<Order> fetchAll = razorpay.orders.fetchAll();
+//	        for (Order order : fetchAll) {
+//				System.out.println(order.toJson().toString());
+//			}
+	        Order order = razorpay.orders.fetch(orderId);
+	        System.out.println(order);
+	        return order.toJson().toString();
+	    } catch (RazorpayException e) {
+//	        return "Error fetching status";
+	    }
+	    return null;
+	}
+	
+	
 	 
+	@GetMapping("/getCache/{str}")
+	public String getSessionCache(@PathVariable String str) {
+		return cacheMachanism.sessionCache(str) ;
+	}
+	
+	
 	
 	
 	

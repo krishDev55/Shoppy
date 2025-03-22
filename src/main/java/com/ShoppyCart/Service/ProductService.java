@@ -1,8 +1,10 @@
 package com.ShoppyCart.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,35 +13,42 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.ShoppyCart.Repository.ProductDao;
+import com.ShoppyCart.Repository.RatingDao;
 import com.ShoppyCart.commonUse.Common;
 import com.ShoppyCart.entity.Categery;
 import com.ShoppyCart.entity.Products;
+import com.ShoppyCart.entity.Rating;
 
 @Service
 public class ProductService {
 		
-	@Autowired
-	ProductDao productDao;
+	@Autowired	ProductDao productDao;
+	
+	@Autowired RatingDao ratingDao;
 	
 	
-	@CachePut(value="Products", key = "product.id")
+	
 	public Products saveProduct(Products product) {
 		Categery categary = product.getCategary();
 		System.out.println("categery is : "+ categary);
 		Products product1 = productDao.saveProduct(product);
+		
 		return product1;
 		}
 		
 	
 	
-	@Cacheable(value = "Products" ,key = "#id")
+	
 		public Products getProductById(int  id) {
-			return productDao.getProductById(id);
+		Products productById = productDao.getProductById(id);
+		List<Rating> allRatingByProductId = ratingDao.getllRatingByProductId(id);
+		productById.setRatings(allRatingByProductId);
+			return productById;
 			}
 		
 	
 	
-	@CachePut(value="Categery", key="categary.catId")
+	
 		public Categery saveCategery(Categery categary) {
 			Categery categary1 = getCategeryById(categary.getCatId());
 //			----
@@ -56,18 +65,16 @@ public class ProductService {
 				
 				return productDao.saveCategery(categary1);
 			}
-			
 			else {
 				return productDao.saveCategery(categary);
 			}
-//			-------------------
 		}
 		
 	
 	
 	
 	
-	@Cacheable(value="Categery" , key = "#id")
+	
 		public Categery getCategeryById(int  id) {		
 			return productDao.getCategeryById(id);
 		}
@@ -76,9 +83,16 @@ public class ProductService {
 	
 	
 	
-		@Cacheable
+		
 		public List<Products> getAllProducts() {
-			return productDao.getAllProducts();
+			List<Products> p_List = productDao.getAllProducts();
+			List<Products> origalList= new ArrayList<>();
+			for (Products p : p_List) {
+				p.setRatings(ratingDao.getllRatingByProductId(p.getId()));
+				origalList.add(p);
+			}
+			
+			return origalList;
 		}
 	
 	
@@ -113,6 +127,14 @@ public class ProductService {
 		
 		public List<Products> searchProduct(String search) {
 			return null;
+		}
+
+
+
+
+		public Products updateProduct(Products product) {
+			
+			return productDao.updateProduct(product);
 		}
 		
 }

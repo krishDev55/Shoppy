@@ -27,7 +27,7 @@ public class Products {
 	
 	
 	 @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	    private List<Rating> ratings = new ArrayList<>();
+	    private List<Rating> ratings;
 	 
 	 
 	 

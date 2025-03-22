@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotEmpty;
 
 @Entity(name = "Orders")
 public class Order {
@@ -14,11 +15,13 @@ public class Order {
 	private String productName ;
 	private String productImg ;
 	private int quentity ;
-	 private double price ;
+	 private double price ; 	
 	 private String time    ;
 	 private String	 status ; 
 	 private int prodId ;
+//	 @NotEmpty()
 	 private int userId ;
+	 
 	public String getOrderId() {
 		return orderId;
 	}

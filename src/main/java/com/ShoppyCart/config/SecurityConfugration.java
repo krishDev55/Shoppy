@@ -46,6 +46,8 @@ public class SecurityConfugration {
 				
 				.csrf(customizer-> customizer.disable())
 				.authorizeHttpRequests(request-> request
+												.requestMatchers("/v1/home/saveUser")
+												.permitAll()
 												.requestMatchers(
 														"/v1/home/**"
 //														"/v1/prod/saveProduct",

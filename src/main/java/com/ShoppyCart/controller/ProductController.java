@@ -7,9 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +28,11 @@ import com.ShoppyCart.entity.Products;
 import com.ShoppyCart.entity.Rating;
 import com.ShoppyCart.entity.Vendor;
 
+import jakarta.validation.Valid;
+
+import org.springframework.web.bind.annotation.RequestParam;
+
+
 @RestController
 @RequestMapping("/v1/prod")
 public class ProductController {
@@ -32,6 +40,8 @@ public class ProductController {
 	@Autowired ProductService productService;
 	@Autowired VendorService vendorService;
 	@Autowired RatingService ratingService;
+	
+	
 
 	@GetMapping("/getAllProduct")
 	public ResponseEntity<Map<String, Object>> getAllProduct() {
@@ -46,6 +56,16 @@ public class ProductController {
 		return ResponseEntity.ok(map);
 	}
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	@GetMapping("/getProductById/{id}")
 	public ResponseEntity<Map<String, Products>> getProductById(@PathVariable Integer id) {
 		Products productById = productService.getProductById(id);
@@ -54,6 +74,13 @@ public class ProductController {
 		return ResponseEntity.ok(map);
 	}
 
+	
+	
+	
+	
+	
+	
+	
 	@PostMapping("/saveProduct")
 	public Products saveProduct(@RequestBody Products product) {
 //List<Products> list= new ArrayList<>();
@@ -73,6 +100,19 @@ public class ProductController {
 		return  productService.saveProduct(product);
 	}
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	@GetMapping("/getProductByVendorId/{vendorId}")
 	public ResponseEntity<Map<String, List<Products>>> getProductByVendorId(@PathVariable String vendorId) {
 		List<Products> allProduct = productService.getProductByVendorId(vendorId);
@@ -81,6 +121,14 @@ public class ProductController {
 		return ResponseEntity.ok(map);
 	}
 
+	
+	@PutMapping("/updateProduct")
+	public Products putMethodName(@RequestBody Products product) {
+		
+		
+		return productService.updateProduct(product);
+	}
+	
 	@GetMapping("/searchProduct/{search}")
 	public List<Products> searchProduct(@PathVariable String search) {
 		return productService.searchProduct(search);
@@ -89,13 +137,13 @@ public class ProductController {
 //	---------------------------------------------------------
 //	Rating 
 	@PostMapping("/setRating")
-	public String setRating(@RequestBody Rating rating) {
+	public String setRating( @Valid @RequestBody Rating rating) {
 		
 		return ratingService.setRating(rating);
 	}
 	
 	@PutMapping("/updateRating")
-	public String updateRating(@RequestBody Rating rating) {
+	public String updateRating(@Valid @RequestBody Rating rating) {
 		return ratingService.updateRating(rating);
 	}
 	@GetMapping("/getAllRatingByProductId/{productId}")
@@ -103,4 +151,26 @@ public class ProductController {
 		return ratingService.getAllRatingByProductId(productId);
 	}
 	 
+//	@GetMapping("/getAllRatingByUserIdAndProductId/{userId}/{prodId}")
+//	public List<Rating> getAllRatingByUserIdAndProductId(@PathVariable int userId,@PathVariable int productId){
+//		return ratingService.getAllRatingByUserIdAndProductId(productId);
+//	}
+	
+	
+	@GetMapping("/CalculateRatingAvarageByProductId/{productId}")
+	public Double calculateRatingAvarage(@PathVariable int productId) {
+		return ratingService.calculateRatingAvarage(productId);
+	}
+	
+	@GetMapping("/getRatingByRatingId/{ratingId}")
+	public Rating getRatingByRatingId(@PathVariable int ratingId) {
+		return ratingService.getRatingByRatingId(ratingId);
+	}
+	
+	
+	@DeleteMapping("/deleteRatingByRatingId/{ratingId}")
+	public String deleteRatingByRatingId(@PathVariable int ratingId) {
+		return ratingService.deleteRatingByRatingId(ratingId);
+	}
+	
 }

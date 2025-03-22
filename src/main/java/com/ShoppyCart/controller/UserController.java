@@ -3,6 +3,7 @@ package com.ShoppyCart.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,11 +23,14 @@ import com.ShoppyCart.entity.Rating;
 import com.ShoppyCart.entity.User;
 import com.ShoppyCart.vo.RatingCombineData;
 
+import jakarta.validation.Valid;
+
 import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController
 @RequestMapping("/v1/user")
+
 public class UserController {
 	@Autowired CartService cartService;
 	@Autowired OrderService ordersService;
@@ -97,8 +101,9 @@ public class UserController {
 		System.out.println(userId+" --- "+orderByUserId);
 		return orderByUserId;
 	}
+	
 	@PostMapping("/saveOrder")
-	public Order saveOrders(@RequestBody Order order) {	
+	public Order saveOrders(  @RequestBody Order order) {	
 		System.out.println("S_Order : "+order);
 		return ordersService.saveOrders(order);
 		
@@ -114,10 +119,11 @@ public class UserController {
 		
 		return ordersService.getOrderByOrderId(orderId);
 	}
+	
 	@DeleteMapping("/deleteOrderById/{orderId}")
 	public String deleteOrderById(@PathVariable String orderId){
-		System.out.println("orderId --> "+orderId);
-		return ordersService.deleteOrderById(orderId);
+		Order order = ordersService.getOrderByOrderId(orderId);
+		return ordersService.deleteOrderById(orderId,order.getUserId());
 		
 	}
 	
