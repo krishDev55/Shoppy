@@ -10,6 +10,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.NativeQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.orm.hibernate5.HibernateTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -28,7 +29,7 @@ public class UserDao {
 			
 		} 
 		
-		
+		@Cacheable(value = "User", key="#id")
 		public User getUserById(int id) {
 			User user = session.find(User.class, id);
 			return user;
@@ -102,7 +103,7 @@ public class UserDao {
 			return null;
 		}
 
-
+		@Cacheable(value = "User", key = "#id")
 		public String getEmailById(int id) {
 			String query ="select email from user where id=? ";
 			 GetString gs= new GetString();

@@ -344,11 +344,12 @@ public class HomeController {
 	
 	@PostMapping("/saveUser")
 	public User saveUser(@RequestBody User user) {
+		user.setUpdUser(null);
 		return userService.saveUser(user);
 	}
 	
 	@GetMapping("/getUserById/{userId}")
-	public User getMethodName(@PathVariable int  userId) {
+	public User getUserById(@PathVariable int  userId) {
 		return userService.getUserById(userId);
 	}
 	

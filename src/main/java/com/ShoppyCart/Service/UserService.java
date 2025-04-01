@@ -1,6 +1,7 @@
 package com.ShoppyCart.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachePut;
@@ -13,8 +14,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.ShoppyCart.Repository.BankAcountDao;
+import com.ShoppyCart.Repository.BankTransactionDao;
 import com.ShoppyCart.Repository.UserDao;
 import com.ShoppyCart.SecurityService.JWTService;
+import com.ShoppyCart.entity.BankAccount;
+import com.ShoppyCart.entity.BankTransaction;
 import com.ShoppyCart.entity.User;
 import com.ShoppyCart.vo.LoginCreadintial;
 
@@ -22,6 +27,9 @@ import com.ShoppyCart.vo.LoginCreadintial;
 public class UserService {
 		@Autowired
 		UserDao userDao;
+		
+		@Autowired BankAcountDao bankAccountDao;
+		@Autowired BankTransactionDao bankTnxDao;
 		
 		@Autowired
 		AuthenticationManager authManager;
@@ -33,7 +41,7 @@ public class UserService {
 		
 	
 		
-		@Cacheable(value = "User", key="#id")
+		
 		public User getUserById(int id) {
 			return userDao.getUserById(id);
 		}
@@ -85,8 +93,54 @@ public class UserService {
 			return userDao.updateUser(user);
 			
 		}
-	@Cacheable(value = "User", key = "#id")
+	
 		public String getEmailById(int id) {
 			return userDao.getEmailById(id);
+		}
+	
+	
+//-------------------------------------------------------------------------------------
+	// bankAccount Section
+	
+	public String saveBankAccount(BankAccount bankAccount) {	
+		 bankAccountDao.saveBankAccount(bankAccount);
+		 return "";
+	}
+	
+	
+	public BankAccount getBankAccountByAccountNu(long accNumber) {
+		return bankAccountDao.getBankAccountById(accNumber);
+	}
+	
+//	--------------------------------------------------------------------------------
+	// bankTransaction flow 
+
+	public void saveBankTnx(BankTransaction bankTnx) {
+		try {
+			BankAccount bAcc = getBankAccountByAccountNu(bankTnx.getAccountNo());
+			if(bAcc== null) {
+				System.out.println("objecct is null");
+				bankTnxDao.saveBankTnx(bankTnx);
+			}
+			else if (bAcc.getBalance()>= bankTnx.getAmount()) {
+				try {
+					bankTnxDao.saveBankTnx(bankTnx);
+					bAcc.setBalance(bAcc.getBalance()-bankTnx.getAmount());
+					bankAccountDao.updateBankAccount(bAcc);
+				}
+				catch (Exception e) {
+					
+				}
+			}
+			else {
+				System.out.println("I think Not SufficentBalence");
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}	
+	 }
+	
+	private void saveBankTnxOnline(BankTransaction bankTnx) {
+		
 		}
 	}

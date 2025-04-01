@@ -17,11 +17,14 @@ import com.ShoppyCart.Service.CartService;
 import com.ShoppyCart.Service.OrderService;
 import com.ShoppyCart.Service.RatingService;
 import com.ShoppyCart.Service.UserService;
+import com.ShoppyCart.entity.BankAccount;
+import com.ShoppyCart.entity.BankTransaction;
 import com.ShoppyCart.entity.Cart;
 import com.ShoppyCart.entity.Order;
 import com.ShoppyCart.entity.Rating;
 import com.ShoppyCart.entity.User;
 import com.ShoppyCart.vo.RatingCombineData;
+
 
 import jakarta.validation.Valid;
 
@@ -32,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/v1/user")
 
 public class UserController {
+	
 	@Autowired CartService cartService;
 	@Autowired OrderService ordersService;
 	@Autowired UserService userService;
@@ -60,6 +64,29 @@ public class UserController {
 	}
 	
 	
+//	------------------------------------------------------------------------------
+//	Bank Account Section  
+	@PostMapping("/saveBankAccount")
+	public String  saveBankAccount(@RequestBody BankAccount bankAccount) {
+			userService.saveBankAccount(bankAccount);
+		return "niu";
+	}
+//	----------------------------------------------------------------------------
+	// BankTransaction Flow 
+	@PostMapping("/saveBankTnx")
+	public String  saveBankTnx(@RequestBody String pay_id) {
+			
+		System.out.println("pay_Id "+ pay_id );
+		String fatch = PaymentController.fatch(pay_id);
+		  System.out.println("Normal Object : "+fatch);
+		
+         System.out.println("jeson Object : "+fatch);
+         
+//		System.out.println("First Chack ....:  "+bankTnx);
+//			userService.saveBankTnx(bankTnx);
+		return "niu";
+	}
+	
 	
 //	-------------------------------------------------------------------------
 //	   cart Section All Api
@@ -76,7 +103,7 @@ public class UserController {
 	public List<Cart> getMethodName(@PathVariable String userId) {
 		int int1 = Integer.parseInt(userId);
 		List<Cart> cartByUserId = cartService.getCartByUserId(int1);
-		System.out.println(cartByUserId);
+		System.out.println( "cart : "+cartByUserId);
 		return cartByUserId;
 	}
 	@GetMapping("/getCardByCartId/{cartId}")

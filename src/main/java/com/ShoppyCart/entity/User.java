@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 
 @Entity
 public class User {
@@ -14,8 +15,19 @@ public class User {
 		private String password;
 		private String mobileNo;
 		
+		@OneToOne
+		private UpdUser updUser;
+		
+		
+		
 		public int getId() {
 			return id;
+		}
+		public UpdUser getUpdUser() {
+			return updUser;
+		}
+		public void setUpdUser(UpdUser updUser) {
+			this.updUser = updUser;
 		}
 		public String getEmail() {
 			return email;
@@ -38,10 +50,7 @@ public class User {
 		public void setMobileNo(String mobileNo) {
 			this.mobileNo = mobileNo;
 		}
-		@Override
-		public String toString() {
-			return "User [id=" + id + ", email=" + email + ", password=" + password + ", mobileNo=" + mobileNo + "]";
-		}
+		
 		public User(int id, String email, String password, String mobileNo) {
 			super();
 			this.id = id;
@@ -53,6 +62,14 @@ public class User {
 			super();
 			// TODO Auto-generated constructor stub
 		}
+		
+		@Override
+		public String toString() {
+			return "User [id=" + id + ", email=" + email + ", password=" + password + ", mobileNo=" + mobileNo
+					+ ", updUser=" + updUser + "]";
+		}
+		
+		
 		
 		
 		

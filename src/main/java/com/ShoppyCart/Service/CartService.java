@@ -24,7 +24,7 @@ public class CartService {
 
 	
 	
-	@Cacheable(value = "Cart", key = "#userId")
+	
 	public List<Cart> getCartByUserId(int userId) {
 		return cartDao.getCartByUserId(userId);
 	}

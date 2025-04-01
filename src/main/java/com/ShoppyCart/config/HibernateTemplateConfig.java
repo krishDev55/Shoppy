@@ -9,11 +9,14 @@ import org.springframework.orm.hibernate5.HibernateTemplate;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBuilder;
 
+import com.ShoppyCart.entity.BankAccount;
+import com.ShoppyCart.entity.BankTransaction;
 import com.ShoppyCart.entity.Cart;
 import com.ShoppyCart.entity.Categery;
 import com.ShoppyCart.entity.Order;
 import com.ShoppyCart.entity.Products;
 import com.ShoppyCart.entity.Rating;
+import com.ShoppyCart.entity.UpdUser;
 import com.ShoppyCart.entity.User;
 import com.ShoppyCart.entity.Vendor;
 
@@ -47,7 +50,10 @@ public class HibernateTemplateConfig  {
 	        									Cart.class,
 	        									Order.class,
 	        									Vendor.class,
-	        									Rating.class
+	        									Rating.class,
+	        									BankTransaction.class,
+	        									BankAccount.class,
+	        									UpdUser.class
 	        									
 	        									
 	        								); // Replace with your package

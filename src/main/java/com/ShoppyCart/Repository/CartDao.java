@@ -9,7 +9,7 @@ import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
@@ -32,6 +32,7 @@ public class CartDao {
 		return cart;
 	}
 
+	@Cacheable(value = "Cart", key = "#userId")
 	public List<Cart> getCartByUserId(int userId) {
 				String query= "select  * from cart where user_id=?";	
 			List<Cart> list= new ArrayList<>();
